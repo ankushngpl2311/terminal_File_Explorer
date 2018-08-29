@@ -6,7 +6,7 @@
 drive: drive.o sum.o
 	gcc drive.o sum.o -o drive
 
-drive.o: drive.c
+drive.o: drive.c sum.h
 	gcc -c drive.c
 
 sum.o: sum.c
