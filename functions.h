@@ -9,18 +9,23 @@ using namespace std;
 //extern struct winsize w;
 extern int row,col,cur_row,cur_col;                 // row,col =dimensions of terminal cur_row,cur_col= postion of cursor 
 extern vector <string> vec;                         //storing ls output
-extern int ovstart,ovend;                           //overflow starting and end indices of vectors printing on screen
+extern int ovstart,ovend;   
+extern int vindex;
+extern string pdir;
+extern string home;                        //overflow starting and end indices of vectors printing on screen
+//extern char a[1000];
 
 
-void homepage();
-void moveto(int x,int y);
+
+void homepage(string home);
+//void moveto(int x,int y);
 
 //Non canonical mode  in termios1.cpp
 void enableRawMode();
 void disableRawMode();
 
 //ls in list.cpp  returns a vector containing names of dir and files
-vector <string> list();
+vector <string> list(string path);
 void printvector();
 
 
@@ -33,4 +38,9 @@ void arrow(char ch);
 void moveto(int x,int y);
 void moveup(int x);
 void movedown(int x);
+
+
+void enter(char ch);
+void hkey(char ch);
+void backspace(char ch);
 

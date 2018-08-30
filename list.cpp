@@ -6,6 +6,7 @@
 #include<string>
 #include<iostream>
 #include "functions.h"
+#include<string.h>
 
 using namespace std;
 
@@ -13,15 +14,60 @@ using namespace std;
 int row=1,col=1,cur_row=1,cur_col=1;    //extern variables
 vector <string> vec;                         //storing ls output
 int ovstart=1,ovend=1;                           //overflow starting and end indices of vectors printing on screen
+int vindex=0;
+
+//string pdir="";
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+void homepage(string home)
+{ 
+  //printf("lines =%d\n columns= %d\n",w.ws_row,w.ws_col);     
+  int i;
+  
+  printf("\033[2J");
+  
+  printf("******************************File explorer************************");
+  
+  for(i=0;i<row-1;i++)                                                         //move cursor to last row
+       printf("\n");
+  
+  moveto(2,1);                                                                 //move to 2nd row and list dirs         
+  
+  vec=list(home);
+  voverflow();  
+  printvector();                               
+  
+  moveto(row-1,1);  
+  //cout<<"---------------------------hm\n";                                     //move to last row and print status bar
+  printf("-------------------------------------------------------------------------------\n");
+  printf("command mode");                                                      //13 chars
+  moveto(2,1);                                                                 //move cursor to 2nd row
+   
+  //cur_row=2;
+  //cur_col=1;
+
+}
 
 
 //*************************************************************************************
-                       //LIST
+//**************************************************************************************
+
+                               //LIST
+
+//**************************************************************************************
 //**************************************************************************************
 
 
@@ -30,15 +76,29 @@ int ovstart=1,ovend=1;                           //overflow starting and end ind
 
 
 
-vector<string> list()
-{  ino_t fsrno;
-   char a[100];
-   char *p,*p2;
+vector<string> list(string path)
+{   
+   vindex=0;         
+   
+   ino_t fsrno;
+   //char a[100];
+   //char *p,*p2;
+   
+
+   //covert string to char*
+   char arr[1000];
+   strcpy(arr, path.c_str());
+   
+
    struct dirent* dirpnt; 
    DIR *dir;
    //vector <string> v;
-   p= getcwd(a,100);
-   dir=opendir(p);
+   vec.clear();
+   //fill(vec.begin(), vec.end(), 0);                            //clears the vector to 0
+   //p= getcwd(a,100);
+
+
+   dir=opendir(arr);
    while(dirpnt=readdir(dir))
    {
      //printf("%s\n",dirpnt->d_name);
@@ -58,6 +118,7 @@ void printvector()
   int i;
   for(i=ovstart;i<=ovend;i++)
     cout<<vec[i]<<"\n";
+    //combined with above cout cout<<"ovstart= "<<ovstart<<"ovend= "<<ovend
 }
 
 
@@ -65,8 +126,12 @@ void printvector()
 
 
 
-//*************************************************************************************
-                       //CURSOR MOVE
+//**************************************************************************************
+//**************************************************************************************
+
+                             //CURSOR MOVE
+
+//**************************************************************************************
 //**************************************************************************************
 
 
@@ -101,7 +166,11 @@ void movedown(int x)
 
 
 //*************************************************************************************
+//**************************************************************************************
+                      
                        //vertical overflow
+
+//**************************************************************************************
 //**************************************************************************************
 
 
@@ -121,12 +190,15 @@ void clearrow(int strow,int endrow)
        printf("\n");
   
   moveto(row-1,1);                                                             //move to last row and print status bar
-  printf("-------------------------------------------------------------------------------\n");
+  printf("---------------------------------------------------------cr\n");
   printf("command mode");                                                      //13 chars
   moveto(2,1);     
 
 
 }
+
+
+
 
 
 void voverflow()                       //initialize values of ovstart and ovend
@@ -136,7 +208,7 @@ void voverflow()                       //initialize values of ovstart and ovend
  //
    if(len > row-3)
    {    ovstart=0;
-        ovend=row-3;                      //ovend= index of vector if vec is greater than size of terminal end is 2nd last line 
+        ovend=row-4;                      //ovend= index of vector if vec is greater than size of terminal end is 2nd last line 
                                                  //of terminal    
    }
    else
@@ -145,6 +217,9 @@ void voverflow()                       //initialize values of ovstart and ovend
     ovend=len-1;                           //when vec is smaller than size of terminal ovend =max size of vector
    }
 }
+
+
+
 
 
 
@@ -159,11 +234,13 @@ void arrow(char ch)
   
   if(ch == 65 && k == 2)       // finally, if the last char of the sequence matches, you've got a key !
     { 
-       if(cur_row!=2)               //if at 2nd row dont move up
-         moveto(cur_row-1,cur_col);
-       if(cur_row==2  && ovstart != 0)  
-       {  ch=getchar();
-          arrow(ch);
+       if(cur_row!=1)               //if at 2nd row dont move up
+          moveto(cur_row-1,cur_col);
+           
+         
+       if(cur_row==1  && ovstart != 0)  
+       {  //ch=getchar();
+          //arrow(ch);
           ovstart--;
           ovend--;
           moveto(2,1);
@@ -171,42 +248,150 @@ void arrow(char ch)
           moveto(2,1);
           printvector(); 
           moveto(row-1,1);                                                             //move to last row and print status bar
-          printf("-------------------------------------------------------------------------------\n");
+          printf("---------------------------------------------------------------ua\n");
           printf("command mode");
-          moveto(2,1);   
-       }   
+          moveto(2,1); 
+
+       }
+
       //printf("You pressed the up arrow key !!\n");
+      
+      if(vindex!=0)
+      { vindex--;             //vector[i] i=i-1;
+        //cout<<vindex;
+      }
+      
+      if(cur_row==1)
+        moveto(2,1);
     }
   
   if(ch == 66 && k == 2)                             
    { 
-      if(cur_row != row-2)
+      if(cur_row != row-1)
         moveto(cur_row+1,cur_col);
-      if(cur_row==row-2 && ovend != vec.size()-1)//place the cursor there only and print vector from overflow
-        {  ch=getchar();
-           arrow(ch);                                              //and check if size of vec is greater than size of terminal vec.size>row-2
+      if(cur_row==row-1 && ovend != vec.size()-1)   //place the cursor there only and print vector from overflow
+        {  //ch=getchar();
+           //arrow(ch);                                              //and check if size of vec is greater than size of terminal vec.size>row-2
           ovstart++;                                       // cursor is not at vec[0]
           ovend++;
           moveto(2,1);
           clearrow(2,row-3);
           moveto(2,1);
-         printvector(); 
+          printvector(); 
           moveto(row-1,1);                                                             //move to last row and print status bar
-  printf("-------------------------------------------------------------------------------\n");
-  printf("command mode");    
-          moveto(row-3,1);
-          }                  
+          printf("-------------------------------------------------------------------da\n");
+          printf("command mode");    
+          moveto(row-2,1);
+        }                  
       //printf("You pressed the down arrow key !!\n");
-   }
-  
-  if(ch == 67 && k==2)
+          if(vindex!=vec.size()-1)
+             vindex++;       //vector[i]  i=i+1
+           //cout<<vindex;}
+
+           if(cur_row==row-1)
+           moveto(row-2,1);                 //needed dont delete  when the flow doesnt enters any of the if's
+    }
+    
+     if(ch == 67 && k==2)
    // printf("right arrow\n");
   
-  if(ch==68 && k==2)
+     if(ch==68 && k==2)
    // printf("left arrow\n");
   
-  if(ch != 27 && ch != 91)      // if ch isn't either of the two, the key pressed isn't up/down so reset k
-    k = 0;
+     if(ch != 27 && ch != 91)      // if ch isn't either of the two, the key pressed isn't up/down so reset k
+        k = 0;
   
+
+
 }
 
+
+
+
+
+
+
+void enter(char ch)
+{    int i; 
+
+  if(ch=='\n')
+  {
+     string s;
+     s = pdir + '/' + vec[vindex];            //concatenate pwd and dir to create path of next dir
+  //s=createpath(pdir,vec[vindex]);
+     pdir=s;
+     vec=list(s);
+     //cout<<vec.size();
+     voverflow();
+     //clearrow(1,row-2);
+     printf("\033[2J");
+     moveto(1,1);
+     printf("******************************File explorer************************");
+  
+     for(i=0;i<row-1;i++)                                                         //move cursor to last row
+         printf("\n");
+  
+     moveto(2,1);           
+     printvector();                               
+  
+     moveto(row-1,1);                                                             //move to last row and print status bar
+     //cout<<"-----------------------------entr";
+     printf("---------------------------------------------------------------entr\n");
+     printf("command mode");                                                      //13 chars
+     moveto(2,1);                                                                 //move cursor to 2nd row
+  }
+
+}
+
+
+
+
+void hkey(char ch)
+{
+   if(ch=='h'||ch=='H')
+   {
+      homepage(home);
+      pdir=home;                           //so that enter function can work again recursively
+   }
+}
+
+
+void backspace(char ch)
+{
+  /*int i,index;
+
+  for(i=0;i<vec.size();i++)
+  {
+        if(vec[i]=="..")
+          { index=i;
+            break;
+          }
+  }*/
+    int i;
+    if(ch==8)
+    {
+     string s;
+     s = pdir + '/' + "..";            //concatenate pwd and dir to create path of next dir
+  //s=createpath(pdir,vec[vindex]);
+     pdir=s;
+     vec=list(s);
+     //cout<<vec.size();
+     voverflow();
+     //clearrow(1,row-2);
+     printf("\033[2J");
+     moveto(1,1);
+     printf("******************************File explorer************************");
+  
+     for(i=0;i<row-1;i++)                                                         //move cursor to last row
+         printf("\n");
+  
+     moveto(2,1);           
+     printvector();                               
+  
+     moveto(row-1,1);                                                             //move to last row and print status bar
+     printf("---------------------------------------------------------------------------back\n");
+     printf("command mode");                                                      //13 chars
+     moveto(2,1);
+     }
+     cout<<ch;
+}

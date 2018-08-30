@@ -14,6 +14,7 @@ int main()
 	//}
 	//cout << x;
 	v.push_back(x);
+	cout<<v.size()<<"\n";
    // int size=v.size();
 	//for(vector <int> :: iterator j = v.begin() ; j != v.end() ; j++)
 	//cout<<*j<<" ";

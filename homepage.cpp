@@ -5,60 +5,48 @@
 #include "functions.h"
 #include<vector>
 #include<string>
+#include<iostream>
+#include<unistd.h>
+#include<dirent.h>
+#include<sys/types.h>
 
 using namespace std;
 
 struct winsize w;
-char ch;                                      //getchar
+char ch; 
+char pwdir[1000];                                     //getchar
 //int row,col,cur_row,cur_col;                 // row,col =dimensions of terminal cur_row,cur_col= postion of cursor 
 //vector <string> vec;                         //storing ls output
 //int ovstart,ovend;                           //overflow starting and end indices of vectors printing on screen
 
+string pdir="";
+string home="";
 
+int main()
+{
+  ioctl(0,TIOCGWINSZ,&w);
 
-
-
-void homepage()
-{ ioctl(0,TIOCGWINSZ,&w);
-  //printf("lines =%d\n columns= %d\n",w.ws_row,w.ws_col);     
-  int i;
-  
   row=w.ws_row;
   col=w.ws_col;
   
   enableRawMode();
   
-  printf("******************************File explorer************************");
-  
-  for(i=0;i<row-1;i++)                                                         //move cursor to last row
-       printf("\n");
-  
-  moveto(2,1);                                                                 //move to 2nd row and list dirs         
-  
-  vec=list();
-  voverflow();  
-  printvector();                               
-  
-  moveto(row-1,1);                                                             //move to last row and print status bar
-  printf("-------------------------------------------------------------------------------\n");
-  printf("command mode");                                                      //13 chars
-  moveto(2,1);                                                                 //move cursor to 2nd row
-   
-  cur_row=2;
-  cur_col=1;
+  //pwdir[0]='\0';
+  home=getcwd(pwdir,1000);
+  homepage(home);
+  pdir=home;
 
-}
-
-
-
-int main()
-{
-  homepage();
+ 
   while(1)
-  {
+  {  
+     //
+     //pdir= getcwd(pwdir,1000);
+     //cout<<pdir;
      ch=getchar();
      arrow(ch);
- 
+     enter(ch);
+     hkey(ch);
+     backspace(ch);
      if(ch==':')
        {  moveto(row-1,13);
           printf("in command mode");
