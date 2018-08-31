@@ -3,6 +3,8 @@
 #include<string>
 #include<iostream>
 #include<stdio.h>
+#include <sys/stat.h>
+#include<stdlib.h>
 using namespace std;
 
 
@@ -14,6 +16,7 @@ extern int vindex;
 extern string pdir;
 extern string home;                        //overflow starting and end indices of vectors printing on screen
 //extern char a[1000];
+extern vector <string> ftype;
 
 
 
@@ -44,3 +47,6 @@ void enter(char ch);
 void hkey(char ch);
 void backspace(char ch);
 
+
+
+void printbground();

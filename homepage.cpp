@@ -46,6 +46,7 @@ int main()
      arrow(ch);
      enter(ch);
      hkey(ch);
+     if(ch==127)
      backspace(ch);
      if(ch==':')
        {  moveto(row-1,13);

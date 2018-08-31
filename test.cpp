@@ -7,34 +7,35 @@
 #include<string>
 #include<iostream>
 #include<cstring>
+#include<string.h>
+#include <sys/stat.h>
+#include<stdlib.h>
 using namespace std;
 
 
 
 
 int main()
-{ string s="/home/ankush/os";
-/*char a[100];
-char *p,*p2;
-char *pdir;
-pdir= getcwd(a,100);
-char b[3]={'a','x','\0'};
-p="/";
-strcat(a,s);
-strcat(a,b);
-//string s = pdir + '/' + b;
-*/
-char a[100];
+{
+	int a;
+	pid_t pid;
+char *filename = "/home/ankush/os/vec";
+struct stat buf;
+stat(filename,&buf);
+if(S_ISDIR(buf.st_mode))
+{
+	printf("%s is a direc",filename);
 
-string pdir=getcwd(a,100);
-cout<<pdir;
-char arr[1000];
-strcpy(arr, s.c_str());
-DIR *dir;
-   //vector <string> v;
-                               //clears the vector to 0
-   //p= getcwd(a,100);
-dir=opendir(arr);
-closedir(dir);
-//cout<<pdir;
+}
+else
+{
+  cout<<"not a dir";
+  pid = fork();
+ if (pid == 0) {
+  execl("/usr/bin/xdg-open", "xdg-open", filename, (char *)0);
+  exit(1);
+    }
+
+}
+
 }

@@ -7,7 +7,8 @@
 #include<iostream>
 #include "functions.h"
 #include<string.h>
-
+#include <sys/stat.h>
+#include<stdlib.h>
 using namespace std;
 
 
@@ -15,6 +16,7 @@ int row=1,col=1,cur_row=1,cur_col=1;    //extern variables
 vector <string> vec;                         //storing ls output
 int ovstart=1,ovend=1;                           //overflow starting and end indices of vectors printing on screen
 int vindex=0;
+
 
 //string pdir="";
 
@@ -29,7 +31,35 @@ int vindex=0;
 
 
 
+void printbground()
+{
 
+  int i;
+  
+  printf("\033[2J");
+  
+  printf("******************************File explorer************************");
+  
+  for(i=0;i<row-1;i++)                                                         //move cursor to last row
+       printf("\n");
+ 
+
+   moveto(2,1);                                                                 //move to 2nd row and list dirs         
+  
+  //vec=list();
+  voverflow();  
+  printvector();                               
+  
+  moveto(row-1,1);  
+  //cout<<"---------------------------hm\n";                                     //move to last row and print Status bar: 
+  printf("-------------------------------------------------------------------------------\n");
+  printf("Status bar:");                                                      //13 chars
+  moveto(2,1);                                                                 //move cursor to 2nd row
+   
+  //cur_row=2;
+  //cur_col=1;
+
+}
 
 
 void homepage(string home)
@@ -51,9 +81,9 @@ void homepage(string home)
   printvector();                               
   
   moveto(row-1,1);  
-  //cout<<"---------------------------hm\n";                                     //move to last row and print status bar
+  //cout<<"---------------------------hm\n";                                     //move to last row and print Status bar: 
   printf("-------------------------------------------------------------------------------\n");
-  printf("command mode");                                                      //13 chars
+  printf("Status bar:");                                                      //13 chars
   moveto(2,1);                                                                 //move cursor to 2nd row
    
   //cur_row=2;
@@ -103,6 +133,7 @@ vector<string> list(string path)
    {
      //printf("%s\n",dirpnt->d_name);
      vec.push_back(dirpnt->d_name);
+     //cout<<dirpnt->d_name<< dirpnt->d_type <<"\n";
    }
    closedir(dir);
    
@@ -189,9 +220,9 @@ void clearrow(int strow,int endrow)
   for(i=0;i<row-1;i++)                                                         //move cursor to last row
        printf("\n");
   
-  moveto(row-1,1);                                                             //move to last row and print status bar
+  moveto(row-1,1);                                                             //move to last row and print Status bar: 
   printf("---------------------------------------------------------cr\n");
-  printf("command mode");                                                      //13 chars
+  printf("Status bar: ");                                                      //13 chars
   moveto(2,1);     
 
 
@@ -247,9 +278,9 @@ void arrow(char ch)
           clearrow(2,row-3);
           moveto(2,1);
           printvector(); 
-          moveto(row-1,1);                                                             //move to last row and print status bar
+          moveto(row-1,1);                                                             //move to last row and print Status bar: 
           printf("---------------------------------------------------------------ua\n");
-          printf("command mode");
+          printf("Status bar: ");
           moveto(2,1); 
 
        }
@@ -265,6 +296,9 @@ void arrow(char ch)
         moveto(2,1);
     }
   
+
+
+
   if(ch == 66 && k == 2)                             
    { 
       if(cur_row != row-1)
@@ -278,9 +312,9 @@ void arrow(char ch)
           clearrow(2,row-3);
           moveto(2,1);
           printvector(); 
-          moveto(row-1,1);                                                             //move to last row and print status bar
+          moveto(row-1,1);                                                             //move to last row and print Status bar: 
           printf("-------------------------------------------------------------------da\n");
-          printf("command mode");    
+          printf("Status bar: ");    
           moveto(row-2,1);
         }                  
       //printf("You pressed the down arrow key !!\n");
@@ -292,9 +326,13 @@ void arrow(char ch)
            moveto(row-2,1);                 //needed dont delete  when the flow doesnt enters any of the if's
     }
     
+  
+
      if(ch == 67 && k==2)
    // printf("right arrow\n");
   
+  
+
      if(ch==68 && k==2)
    // printf("left arrow\n");
   
@@ -313,33 +351,73 @@ void arrow(char ch)
 
 void enter(char ch)
 {    int i; 
+  //convert string to char*
+  
 
-  if(ch=='\n')
-  {
-     string s;
-     s = pdir + '/' + vec[vindex];            //concatenate pwd and dir to create path of next dir
-  //s=createpath(pdir,vec[vindex]);
-     pdir=s;
-     vec=list(s);
-     //cout<<vec.size();
-     voverflow();
-     //clearrow(1,row-2);
-     printf("\033[2J");
-     moveto(1,1);
-     printf("******************************File explorer************************");
   
-     for(i=0;i<row-1;i++)                                                         //move cursor to last row
-         printf("\n");
+  //printf("%s is a direc",filename);
+
+
+    if(ch=='\n')
+    {   
+
+        
+
+
+        string s;
+        s = pdir + '/' + vec[vindex];            //concatenate pwd and dir to create path of next dir
+        //s=createpath(pdir,vec[vindex]);
+        //pdir=s;                               //only if it is a directory if done in file pdir ==dir1/file.text/dir2
+      
+        char arr[1000];
+        strcpy(arr, s.c_str());  
+
+        struct stat buf;
+        stat(arr,&buf);
+        pid_t pid;
+
+
+      if(S_ISDIR(buf.st_mode))
+      {
+        vec=list(s);
+        //cout<<vec.size();
+        /*voverflow();
+        //clearrow(1,row-2);
+        printf("\033[2J");
+        moveto(1,1);
+        printf("******************************File explorer************************");
   
-     moveto(2,1);           
-     printvector();                               
+        for(i=0;i<row-1;i++)                                                         //move cursor to last row
+            printf("\n");
   
-     moveto(row-1,1);                                                             //move to last row and print status bar
-     //cout<<"-----------------------------entr";
-     printf("---------------------------------------------------------------entr\n");
-     printf("command mode");                                                      //13 chars
-     moveto(2,1);                                                                 //move cursor to 2nd row
-  }
+        moveto(2,1);           
+        printvector();                               
+  
+        moveto(row-1,1);                                                             //move to last row and print Status bar: 
+        //cout<<"-----------------------------entr";
+        printf("---------------------------------------------------------------entr\n");
+        printf("Status bar: ");                                                      //13 chars
+        moveto(2,1);                                                                 //move cursor to 2nd row
+        */
+        printbground();
+
+
+        pdir=s;
+       }
+      else
+      {
+         pid = fork();
+         if (pid == 0) 
+         {
+
+             execl("/usr/bin/xdg-open", "xdg-open", arr, (char *)0);
+             exit(1);
+         }
+      }
+
+   }
+
+
 
 }
 
@@ -368,15 +446,28 @@ void backspace(char ch)
           }
   }*/
     int i;
-    if(ch==8)
+    if(pdir != home)                     //if pdir== home dont move back 
     {
      string s;
-     s = pdir + '/' + "..";            //concatenate pwd and dir to create path of next dir
+     //s = pdir + '/' + "..";            //concatenate pwd and dir to create path of next dir
   //s=createpath(pdir,vec[vindex]);
+     s=pdir;
+     int i,j=0,l;
+     l=s.length();
+     for(i=l-1;i>=0;i--)                 //removes last dir as a/b/c => a/b
+     {   j++;
+         if(s[i]=='/')
+         {
+           s.erase(i,j);
+           break;
+          }
+  
+      }
+
      pdir=s;
      vec=list(s);
      //cout<<vec.size();
-     voverflow();
+     /*voverflow();                                                       comment 2
      //clearrow(1,row-2);
      printf("\033[2J");
      moveto(1,1);
@@ -388,10 +479,20 @@ void backspace(char ch)
      moveto(2,1);           
      printvector();                               
   
-     moveto(row-1,1);                                                             //move to last row and print status bar
+     moveto(row-1,1);                                                             //move to last row and print Status bar: 
      printf("---------------------------------------------------------------------------back\n");
-     printf("command mode");                                                      //13 chars
-     moveto(2,1);
+     printf("Status bar: ");                                                      //13 chars
+     moveto(2,1);*/
+     printbground();
      }
-     cout<<ch;
+     if(pdir == home)
+     {   
+       moveto(row,1);
+       printf("Status bar: ");
+       moveto(2,1);
+     }
+     //cout<<ch;
 }
+
+
+
