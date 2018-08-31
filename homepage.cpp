@@ -35,7 +35,7 @@ int main()
   home=getcwd(pwdir,1000);
   homepage(home);
   pdir=home;
-
+  stkl.push(pdir);
  
   while(1)
   {  
@@ -49,8 +49,10 @@ int main()
      if(ch==127)
      backspace(ch);
      if(ch==':')
-       {  moveto(row-1,13);
+       {  moveto(row,13);
           printf("in command mode");
+          //getchar();
+
           break;
        }
   

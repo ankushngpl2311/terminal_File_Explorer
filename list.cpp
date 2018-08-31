@@ -17,6 +17,9 @@ vector <string> vec;                         //storing ls output
 int ovstart=1,ovend=1;                           //overflow starting and end indices of vectors printing on screen
 int vindex=0;
 
+stack <string> stkl;
+stack <string> stkr;
+
 
 //string pdir="";
 
@@ -329,11 +332,41 @@ void arrow(char ch)
   
 
      if(ch == 67 && k==2)
-   // printf("right arrow\n");
+      {   
+        if(!stkr.empty())
+        {
+          string y=stkr.top();
+          stkr.pop();
+          stkl.push(y);
+          list(y);
+          printbground();
+
+        }
+         
+
+
+      }
+      // printf("right arrow\n");
   
   
 
      if(ch==68 && k==2)
+     {     
+         if(stkl.size()!=1)
+         {
+          string s= stkl.top();
+          stkr.push(s);
+          stkl.pop();
+          list(stkl.top());
+          printbground();
+         }
+         if(stkl.size()==1)
+         {
+            list(home);
+            printbground();
+         }
+       
+     }
    // printf("left arrow\n");
   
      if(ch != 27 && ch != 91)      // if ch isn't either of the two, the key pressed isn't up/down so reset k
@@ -403,8 +436,11 @@ void enter(char ch)
 
 
         pdir=s;
+
+
+        stkl.push(pdir);                            //left stack push
        }
-      else
+      else                                                  //open file
       {
          pid = fork();
          if (pid == 0) 
@@ -430,6 +466,7 @@ void hkey(char ch)
    {
       homepage(home);
       pdir=home;                           //so that enter function can work again recursively
+      stkl.push(pdir);
    }
 }
 
@@ -484,6 +521,8 @@ void backspace(char ch)
      printf("Status bar: ");                                                      //13 chars
      moveto(2,1);*/
      printbground();
+
+     stkl.push(pdir);                        //left stack push
      }
      if(pdir == home)
      {   

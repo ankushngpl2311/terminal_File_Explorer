@@ -5,6 +5,7 @@
 #include<stdio.h>
 #include <sys/stat.h>
 #include<stdlib.h>
+#include<stack>
 using namespace std;
 
 
@@ -17,6 +18,10 @@ extern string pdir;
 extern string home;                        //overflow starting and end indices of vectors printing on screen
 //extern char a[1000];
 extern vector <string> ftype;
+
+
+extern stack <string> stkl;
+extern stack <string> stkr;
 
 
 
