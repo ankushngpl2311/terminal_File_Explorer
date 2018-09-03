@@ -9,11 +9,14 @@
 #include<string.h>
 #include <sys/stat.h>
 #include<stdlib.h>
+
+#include <sstream>
 using namespace std;
 
 
 int row=1,col=1,cur_row=1,cur_col=1;    //extern variables
-vector <string> vec;                         //storing ls output
+vector <string> vec;                        //storing ls output
+vector <string> fdetails;
 int ovstart=1,ovend=1;                           //overflow starting and end indices of vectors printing on screen
 int vindex=0;
 
@@ -79,7 +82,7 @@ void homepage(string home)
   
   moveto(2,1);                                                                 //move to 2nd row and list dirs         
   
-  vec=list(home);
+  list(home,vec);
   voverflow();  
   printvector();                               
   
@@ -103,13 +106,65 @@ void homepage(string home)
 //**************************************************************************************
 //**************************************************************************************
 
+string int_to_str(int num)
+{
+    stringstream ss;
+
+    ss << num;
+
+    return ss.str();
+}
+
+void getdetails(string filename)
+{
+    struct stat fileStat;
+     char arr[1000];
+   strcpy(arr, filename.c_str());
+
+     if(stat(arr,&fileStat) < 0)
+     {   cout<<"no";    
+        return;
+    }
+
+
+    string s="";
+    char t[ 100 ] = "";
+    
+
+    string s1=int_to_str(fileStat.st_size);
+    
+    s=s+ s1; //+ " bytes   ";
+    int j,l;
+    l=s.length();
+    if(l<13)
+    {
+      for(j=l;j<10;j++)
+        s=s+" ";
+    }
+    s=s+"bytes   ";
+    strftime(t, 100, "%d/%m/%Y %H:%M:%S", localtime( &fileStat.st_mtime));
+ 
+    s1=t;
+    s=s + s1+ "   ";
+   
+
+   s=s+((S_ISDIR(fileStat.st_mode)) ? "d" : "-");
+   s+=((fileStat.st_mode & S_IRUSR) ? "r" : "-");
+   s+=((fileStat.st_mode & S_IWUSR) ? "w" : "-");
+   s+=((fileStat.st_mode & S_IXUSR) ? "x" : "-");
+   s+=( (fileStat.st_mode & S_IRGRP) ? "r" : "-");
+    s+=( (fileStat.st_mode & S_IWGRP) ? "w" : "-");
+    s+=( (fileStat.st_mode & S_IXGRP) ? "x" : "-");
+    s+=((fileStat.st_mode & S_IROTH) ? "r" : "-");
+    s+=( (fileStat.st_mode & S_IWOTH) ? "w" : "-");
+    s+=( (fileStat.st_mode & S_IXOTH) ? "x" : "-");
+
+    fdetails.push_back(s);
+}
 
 
 
-
-
-
-vector<string> list(string path)
+void list(string path,vector <string> &vec)                   
 {   
    vindex=0;         
    
@@ -119,7 +174,7 @@ vector<string> list(string path)
    
 
    //covert string to char*
-   char arr[1000];
+   char arr[1000],arr1[1000];
    strcpy(arr, path.c_str());
    
 
@@ -127,20 +182,24 @@ vector<string> list(string path)
    DIR *dir;
    //vector <string> v;
    vec.clear();
+   fdetails.clear();
    //fill(vec.begin(), vec.end(), 0);                            //clears the vector to 0
    //p= getcwd(a,100);
 
-
+   string s;
    dir=opendir(arr);
    while(dirpnt=readdir(dir))
-   {
+   {   s="";
+       s=path+"/"+ string(dirpnt->d_name);
      //printf("%s\n",dirpnt->d_name);
      vec.push_back(dirpnt->d_name);
+     getdetails(s);
+     //getdetails(dirpnt->d_name);
      //cout<<dirpnt->d_name<< dirpnt->d_type <<"\n";
    }
    closedir(dir);
    
-   return vec;
+   //return vec;
   // printf("cwd =%s\n",p);
   // printf("dir=== %s",d.d_name);
 
@@ -149,9 +208,17 @@ vector<string> list(string path)
 
 void printvector()
 {
-  int i;
+  int i,j,l;
   for(i=ovstart;i<=ovend;i++)
-    cout<<vec[i]<<"\n";
+   { cout<<vec[i];
+     l=vec[i].length();
+     if(l<25)
+     {
+        for(j=l;j<25;j++)
+          cout<<" ";
+     }
+     cout<<fdetails[i]<<"\n";
+    }  
     //combined with above cout cout<<"ovstart= "<<ovstart<<"ovend= "<<ovend
 }
 
@@ -338,7 +405,7 @@ void arrow(char ch)
           string y=stkr.top();
           stkr.pop();
           stkl.push(y);
-          list(y);
+          list(y,vec);
           printbground();
 
         }
@@ -357,12 +424,12 @@ void arrow(char ch)
           string s= stkl.top();
           stkr.push(s);
           stkl.pop();
-          list(stkl.top());
+          list(stkl.top(),vec);
           printbground();
          }
          if(stkl.size()==1)
          {
-            list(home);
+            list(home,vec);
             printbground();
          }
        
@@ -411,8 +478,8 @@ void enter(char ch)
 
 
       if(S_ISDIR(buf.st_mode))
-      {
-        vec=list(s);
+      {  pdir=s;
+        list(s,vec);
         //cout<<vec.size();
         /*voverflow();
         //clearrow(1,row-2);
@@ -435,7 +502,7 @@ void enter(char ch)
         printbground();
 
 
-        pdir=s;
+        //pdir=s;
 
 
         stkl.push(pdir);                            //left stack push
@@ -464,8 +531,9 @@ void hkey(char ch)
 {
    if(ch=='h'||ch=='H')
    {
+      pdir=home;
       homepage(home);
-      pdir=home;                           //so that enter function can work again recursively
+      //pdir=home;                           //so that enter function can work again recursively
       stkl.push(pdir);
    }
 }
@@ -502,7 +570,7 @@ void backspace(char ch)
       }
 
      pdir=s;
-     vec=list(s);
+     list(s,vec);
      //cout<<vec.size();
      /*voverflow();                                                       comment 2
      //clearrow(1,row-2);
@@ -531,6 +599,371 @@ void backspace(char ch)
        moveto(2,1);
      }
      //cout<<ch;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+//**********************************************************************************************
+
+
+                               //COMMAND MODE 
+
+//***********************************************************************************************
+
+
+ vector <string> command;
+
+void clearstatus()
+{   moveto(row-1,13);
+    int i;
+    for(i=14;i<col-1;i++)
+      printf(" ");
+    moveto(row-1,13);
+    
+}
+void cmdmode()
+{
+  //enableRawMode();
+
+
+  moveto(row,13);
+  string s="";
+  while(1)
+{  
+  char ch;
+  
+  ch=getchar();
+  if(ch==27)
+    break;
+  //cout<<s<<"\n";
+  int len=s.length();
+  if(ch=='\n')
+    { getcommand(s);
+      execute();
+      clearstatus();
+      s="";                    //for next command
+    }
+  if(ch==127)
+     backcmd(len,s);
+ 
+  
+  else
+    s=s+ch;
+  //if(ch=='\n')
+    //getcommand(s);
+
+    
+    printf("%c",ch);
+  
+  }
+
+
+}
+
+
+
+
+
+void backcmd(int len,string &s)
+{   if(len>0)
+  {
+    printf("\033[1D");
+    printf(" ");  
+    printf("\033[1D");
+    s.erase(len-1,1);
+    }
+}
+
+
+
+void getcommand(string s)
+{
+  int i;
+  string s1="";
+  int flag=0;
+  command.clear();
+  //vector <string> command;
+  for(i=0;i<s.length();i++)
+  { 
+     if(s[i]=='\'')
+       { 
+         flag++;
+         if(flag==2)
+          flag=0;
+       }   
+    
+    if(s[i]!=' '||flag==1)
+    {   
+      s1=s1 + s[i];
+    }
+    
+    if((s[i]==' '||i==s.length()-1)&&flag==0)
+    {
+      if(s1!="")
+      command.push_back(s1);
+      s1= "";
+    }
+
+  }
+   
+
+   int l=command.size();
+
+   //for(i=0;i<l;i++)
+    //cout<< command[i]<<"\n";
+
+    //cout<<"again"<<command[0];
+
+}
+
+
+
+
+void execute()
+{   //cout<<"hello there";
+    //cout<< command[0];
+     int l=command.size();
+     int i;
+
+     for(i=1;i<l;i++)
+     {
+      //int length1=command[i].length();
+      if(command[i][0]=='\''&&  command[i][command[i].length()-1]=='\'')
+      {
+         command[i].erase(command[i].length()-1,1);
+         command[i].erase(0,1); 
+        }
+        else
+          { cout<<"invalid arguments";
+              return;
+            }
+     }
+    
+
+
+    if(command[0]=="create_file")
+    {
+      //cout<<"in execute";
+         //command[1].erase(command[1].length()-1,1);
+         //command[1].erase(0,1); 
+      create_file(command[1],command[2]);
+    }
+    
+    
+    else if(command[0]=="create_dir")
+      create_dir(command[1],command[2]);
+    
+    
+
+    else if(command[0]=="rename")
+    {
+      rename(command[1],command[2]);
+    }
+     
+
+    
+    else if(command[0]=="move")
+    {
+      //int j=command.size();
+        
+        for(i=1;i<l-1;i++)
+        {   
+           move(command[i],command[l-1]);
+        }
+
+        //move(command[1],command[2]);
+
+    }
+    else if(command[0]=="goto")
+    {
+        gotoo(command[1]);
+    }
+    else 
+    {   clearstatus();
+         //print("");
+    }
+
+}
+
+
+
+void create_file(string filename,string destination)
+{   //cout<<filename<<" "<<destination;
+  
+      filename= home + "/" + filename;
+      destination= home + "/" + destination;
+      
+
+  FILE *fptr;
+     string s=destination + "/" + filename;
+
+
+     char arr[1000];
+        strcpy(arr, s.c_str()); 
+
+
+  fptr=fopen(arr,"w");
+  //cout<<"file created";
+
+  fclose(fptr);
+}
+
+
+void create_dir(string dirname,string destination)
+{
+  struct stat st = {0};
+
+     dirname=home + "/" +dirname;
+     destination=home + "/" + destination;
+
+    string s=destination + "/" + dirname;
+
+
+    char arr[1000];
+    strcpy(arr, s.c_str()); 
+   
+    if (stat(arr, &st) == -1) 
+    {
+       mkdir(arr, 0700);
+       cout<<"dir created ";
+       cout<<"Press enter";
+
+       char z=getchar();
+       if(z=='\n');
+       clearstatus();
+
+    }
+    else
+      { cout<<"dir exists";
+        cout<<"Press enter";
+
+       char z=getchar();
+       if(z=='\n');
+       clearstatus();
+      }
+}
+
+
+
+void rename(string oldfile,string newfile)                        //implement if not a file
+{
+
+
+    //string s=destination + "/" + dirname;
+    
+     oldfile = home + "/" + oldfile;
+     newfile = home + "/" + newfile; 
+    char oldf[1000],newf[100];
+    strcpy(oldf, oldfile.c_str());
+    strcpy(newf, newfile.c_str());
+
+
+      int x = rename(oldf, newf);          
+  
+    if(x == 0) 
+    {
+      printf("Renamed");
+      cout<<"Press enter";
+
+       char z=getchar();
+       if(z=='\n');
+       clearstatus();
+
+    } 
+   else 
+   {
+      printf("unable to rename");
+      cout<<"Press enter";
+
+       char z=getchar();
+       if(z=='\n');
+       clearstatus();
+
+
+    }
+
+
+}
+
+
+
+void move(string filename,string destination)
+{
+      filename= home + "/" + filename;
+      destination= home + "/" + destination;
+
+
+     char oldf[1000],newd[100];
+     int l=filename.length();
+
+     int i;
+     string s=filename;
+     
+     for(i=l-1;i>=0;i--)
+     {
+      if(s[i]=='/')
+        break;
+
+     } 
+     s.erase(0,i);
+     string dest= destination +s;
+    
+    strcpy(oldf, filename.c_str());
+    strcpy(newd, dest.c_str());
+
+      //cout<<oldf<<"\n"<<newd<<"\n";
+      int x = rename(oldf, newd);
+
+
+       if(x == 0) 
+    {
+      printf("Moved ");
+      cout<<"Press enter";
+
+       char z=getchar();
+       if(z=='\n');
+       clearstatus();
+
+
+     } 
+   else 
+   {
+      printf("Error ");
+      cout<<"Press enter";
+
+       char z=getchar();
+       if(z==97);
+       clearstatus();
+       
+
+    }
+
+
+}
+
+
+
+void gotoo(string path)
+{
+  if(path=="/")
+   {
+    list(home,vec);
+     printbground();
+     return;
+   } 
+   path= home + path;
+   list(path,vec);
+   printbground();
 }
 
 

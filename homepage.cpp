@@ -42,6 +42,7 @@ int main()
      //
      //pdir= getcwd(pwdir,1000);
      //cout<<pdir;
+    //moveto(2,1);
      ch=getchar();
      arrow(ch);
      enter(ch);
@@ -49,12 +50,16 @@ int main()
      if(ch==127)
      backspace(ch);
      if(ch==':')
-       {  moveto(row,13);
-          printf("in command mode");
+       {  cmdmode();
+           moveto(2,1);
+           //moveto(row,13);
+          //printf("in command mode");
           //getchar();
 
-          break;
+         // break;
        }
+       if(ch==113)               //press q to exit
+        break;
   
   }
 
