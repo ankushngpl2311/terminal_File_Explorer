@@ -34,6 +34,8 @@ extern stack <string> stkr;
 extern vector <string> command;
 extern vector <string> cmdvec;
 
+
+extern int gotoflag;
 void homepage(string home);
 //void moveto(int x,int y);
 

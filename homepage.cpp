@@ -43,6 +43,7 @@ int main()
      //pdir= getcwd(pwdir,1000);
      //cout<<pdir;
     //moveto(2,1);
+      //homepage(home);
      ch=getchar();
      arrow(ch);
      enter(ch);
@@ -52,6 +53,7 @@ int main()
      if(ch==':')
        {  cmdmode();
            moveto(2,1);
+           //list()
            //moveto(row,13);
           //printf("in command mode");
           //getchar();

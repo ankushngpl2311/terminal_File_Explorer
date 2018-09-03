@@ -620,15 +620,17 @@ void backspace(char ch)
 
 //***********************************************************************************************
 
-
+  int gotoflag=0;
  vector <string> command;
 
 void clearstatus()
-{   moveto(row-1,13);
+{   moveto(row,13);
     int i;
-    for(i=14;i<col-1;i++)
-      printf(" ");
-    moveto(row-1,13);
+    for(i=14;i<col-5;i++)
+      cout<<" ";
+    //moveto(row-1,13);
+    moveto(row,13);
+    //cout
     
 }
 void cmdmode()
@@ -643,27 +645,37 @@ void cmdmode()
   char ch;
   
   ch=getchar();
+  int len=s.length();
   if(ch==27)
     break;
   //cout<<s<<"\n";
-  int len=s.length();
-  if(ch=='\n')
+  
+  else if(ch=='\n')
     { getcommand(s);
       execute();
-      clearstatus();
+
+      //clearstatus();
       s="";                    //for next command
+    
+     if(gotoflag==1)
+      {  gotoflag=0;
+
+          break;
+      }
     }
-  if(ch==127)
+  else if(ch==127)
      backcmd(len,s);
  
   
   else
-    s=s+ch;
+   { s=s+ch;
+      printf("%c",ch);
+    }
   //if(ch=='\n')
     //getcommand(s);
 
     
-    printf("%c",ch);
+    
   
   }
 
@@ -744,8 +756,16 @@ void execute()
          command[i].erase(0,1); 
         }
         else
-          { cout<<"invalid arguments";
-              return;
+          { cout<<" Invalid arguments. Press Enter";
+             char z;
+              do
+               { 
+                 z=getchar();
+                }while(z!='\n');
+
+                if(z=='\n')
+                 clearstatus();   
+                return;
             }
      }
     
@@ -787,10 +807,26 @@ void execute()
     else if(command[0]=="goto")
     {
         gotoo(command[1]);
+        gotoflag=1;
+        return;
+
     }
     else 
-    {   clearstatus();
+    {   cout<<"           INVALID COMMAND!!. Press enter";
+     
+      char z;
+     do
+     { 
+          z=getchar();
+     }while(z!='\n');
+
+     if(z=='\n')
+     clearstatus();  
+       //clearstatus();
          //print("");
+     
+     
+     
     }
 
 }
@@ -799,11 +835,17 @@ void execute()
 
 void create_file(string filename,string destination)
 {   //cout<<filename<<" "<<destination;
-  
-      filename= home + "/" + filename;
+    int flag=0;
+      //filename= home + "/" + filename;
+       if(destination==".")
+      { destination =pdir;
+        flag=1;
+      }
+    else
       destination= home + "/" + destination;
       
-
+   
+  
   FILE *fptr;
      string s=destination + "/" + filename;
 
@@ -816,16 +858,38 @@ void create_file(string filename,string destination)
   //cout<<"file created";
 
   fclose(fptr);
+   if(flag==1)
+   {
+   list(destination,vec);
+   printbground();
+   moveto(row,13);}
+   cout<<"file created";
+  cout<<"Press enter";
+
+       char z;
+     do
+     { 
+          z=getchar();
+     }while(z!='\n');
+
+     if(z=='\n')
+     clearstatus(); 
 }
 
 
 void create_dir(string dirname,string destination)
-{
+{  int flag=1;
   struct stat st = {0};
+   if(destination==".")
+          {  flag=1;
+            destination =pdir;
+          }
+     //dirname=home + "/" +dirname;
+      else
+       destination=home + "/" + destination;
 
-     dirname=home + "/" +dirname;
-     destination=home + "/" + destination;
 
+       
     string s=destination + "/" + dirname;
 
 
@@ -835,21 +899,36 @@ void create_dir(string dirname,string destination)
     if (stat(arr, &st) == -1) 
     {
        mkdir(arr, 0700);
+       if(flag==1)
+       {
+       list(destination,vec);
+        printbground();
+       moveto(row,13);
+     }
        cout<<"dir created ";
        cout<<"Press enter";
+       char z;
+     do
+     { 
+          z=getchar();
+     }while(z!='\n');
 
-       char z=getchar();
-       if(z=='\n');
-       clearstatus();
+     if(z=='\n')
+     clearstatus(); 
 
     }
     else
       { cout<<"dir exists";
         cout<<"Press enter";
 
-       char z=getchar();
-       if(z=='\n');
-       clearstatus();
+       char z;
+     do
+     { 
+          z=getchar();
+     }while(z!='\n');
+
+     if(z=='\n')
+     clearstatus(); 
       }
 }
 
@@ -875,9 +954,14 @@ void rename(string oldfile,string newfile)                        //implement if
       printf("Renamed");
       cout<<"Press enter";
 
-       char z=getchar();
-       if(z=='\n');
-       clearstatus();
+       char z;
+     do
+     { 
+          z=getchar();
+     }while(z!='\n');
+
+     if(z=='\n')
+     clearstatus(); 
 
     } 
    else 
@@ -885,9 +969,14 @@ void rename(string oldfile,string newfile)                        //implement if
       printf("unable to rename");
       cout<<"Press enter";
 
-       char z=getchar();
-       if(z=='\n');
-       clearstatus();
+       char z;
+     do
+     { 
+          z=getchar();
+     }while(z!='\n');
+
+     if(z=='\n')
+     clearstatus(); 
 
 
     }
@@ -901,7 +990,7 @@ void move(string filename,string destination)
 {
       filename= home + "/" + filename;
       destination= home + "/" + destination;
-
+     
 
      char oldf[1000],newd[100];
      int l=filename.length();
@@ -925,26 +1014,43 @@ void move(string filename,string destination)
       int x = rename(oldf, newd);
 
 
-       if(x == 0) 
-    {
-      printf("Moved ");
-      cout<<"Press enter";
+     if(x == 0) 
+     {   if(destination==pdir)                           //live changes reflect to normal mode
+         {
+              list(destination,vec);
+              printbground();
+              moveto(row,13);
+         }
+       moveto(row,13);
+       printf("Moved ");
+       cout<<"Press enter";
 
-       char z=getchar();
-       if(z=='\n');
-       clearstatus();
+      char z;
+       do
+       { 
+            z=getchar();
+       }while(z!='\n');
+
+       if(z=='\n')
+        clearstatus(); 
 
 
-     } 
+    }
+
+
    else 
    {
       printf("Error ");
       cout<<"Press enter";
-
+       fflush(stdin);
        char z=getchar();
-       if(z==97);
+        moveto(row,13);
+       if(z=='\n')
+       {  int i;
+          
+        // moveto(row,13);
        clearstatus();
-       
+       }
 
     }
 
@@ -962,8 +1068,23 @@ void gotoo(string path)
      return;
    } 
    path= home + path;
+   stkl.push(path);
+   pdir=path;
+
    list(path,vec);
    printbground();
+   //pdir=path;
+   
+     /*cout<<"Press enter";
+      char z=getchar();
+        moveto(row,13);
+       if(z=='\n')
+       {  int i;
+          
+        // moveto(row,13);
+       clearstatus();
+       }
+*/
 }
 
 
